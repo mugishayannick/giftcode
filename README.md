@@ -1,8 +1,16 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+GiftCode is a small app for assigning each player a unique number (1..55), letting players log in by name to see their number, choose another player's number, and saving the choice privately. Admin can seed names and view selections.
 
 ## Getting Started
 
-First, run the development server:
+Create a `.env.local` with:
+
+```
+MONGODB_URI=your_mongodb_connection_string
+MONGODB_DB=giftcode
+ADMIN_PASSWORD=change-me
+```
+
+Then run the development server:
 
 ```bash
 npm run dev
@@ -14,9 +22,33 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Player flow is on `src/app/page.tsx`. Admin dashboard is on `/admin`.
+
+### Seed players
+
+1. Visit `/admin` and log in with the password you set in `ADMIN_PASSWORD`.
+2. Paste 55 names (one per line or comma-separated) and click "Seed names".
+
+### API routes
+
+- `POST /api/login` { name }
+- `POST /api/select` { playerId, selectedPlayerId }
+- `GET /api/names`
+- `POST /api/admin/login` { password }
+- `GET /api/admin/players`
+- `POST /api/admin/seed` { names: string[] }, `GET /api/admin/seed` (count)
+
+### Deploying to Vercel
+
+Set the following Environment Variables in Vercel:
+
+- `MONGODB_URI`
+- `MONGODB_DB` (optional, defaults to `giftcode`)
+- `ADMIN_PASSWORD`
+
+Then deploy normally. API routes run on Vercel serverless.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
