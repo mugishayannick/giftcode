@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { formatDisplayName } from "@/lib/format";
 
 export type ComboboxOption = { value: string; label: string };
 
@@ -36,11 +37,11 @@ export function SearchableCombobox({
     );
   }, [options, normalizedQuery]);
 
-  // Keep query in sync with selected value's label
+  // Keep query in sync with selected value's label (formatted)
   useEffect(() => {
     const current = options.find((o) => o.value === value);
     if (!open) {
-      setQuery(current ? current.label : "");
+      setQuery(current ? formatDisplayName(current.label) : "");
     }
   }, [value, options, open]);
 
@@ -58,7 +59,7 @@ export function SearchableCombobox({
 
   function handleSelect(opt: ComboboxOption) {
     onChange(opt.value);
-    setQuery(opt.label);
+    setQuery(formatDisplayName(opt.label));
     setOpen(false);
     setHighlightedIndex(-1);
   }
@@ -161,8 +162,7 @@ export function SearchableCombobox({
                       : "bg-white dark:bg-neutral-900"
                   } ${selected ? "font-semibold" : ""}`}
                 >
-                  {/* Hide any leading numbers to avoid implying IDs */}
-                  {opt.label.replace(/^\s*\d+\s*[).\-]*\s*/, "")}
+                  {formatDisplayName(opt.label)}
                 </li>
               );
             })

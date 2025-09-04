@@ -5,6 +5,7 @@ import {
   SearchableCombobox,
   type ComboboxOption,
 } from "@/components/SearchableCombobox";
+import { formatDisplayName } from "@/lib/format";
 
 type Player = {
   id: number;
@@ -17,6 +18,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedName, setSelectedName] = useState<string>("");
+  const [searchKey, setSearchKey] = useState<number>(0);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [choiceSaved, setChoiceSaved] = useState(false);
   const [target, setTarget] = useState<number | null>(null);
@@ -88,6 +90,15 @@ export default function Home() {
     }
   }
 
+  function handleBack() {
+    setTarget(null);
+    setChoiceSaved(false);
+    setCurrentPlayer(null);
+    setError(null);
+    setSelectedName("");
+    setSearchKey((k) => k + 1);
+  }
+
   const options: ComboboxOption[] = useMemo(() => {
     const arr: ComboboxOption[] = players.map((p) => ({
       value: p.name,
@@ -116,6 +127,7 @@ export default function Home() {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <SearchableCombobox
+                    key={searchKey}
                     options={options}
                     value={selectedName}
                     onChange={setSelectedName}
@@ -140,18 +152,14 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold">
-                  Hello, {currentPlayer.name}
+                  Hello, {formatDisplayName(currentPlayer.name)}
                 </h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                  Your number is
-                </p>
               </div>
-              <div className="text-4xl font-black">{currentPlayer.id}</div>
             </div>
 
             {!choiceSaved ? (
               <div className="mt-4">
-                <p className="mb-2">Pick a number (not your own):</p>
+                <p className="mb-2">Pick a number</p>
                 <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
                   {shuffledNumbers.map((n) => (
                     <button
@@ -168,7 +176,14 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-between">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded border border-neutral-300 dark:border-neutral-700"
+                    onClick={handleBack}
+                  >
+                    Back
+                  </button>
                   <button
                     className="px-4 py-2 rounded bg-black text-white disabled:opacity-50"
                     onClick={handleSelect}
@@ -179,8 +194,19 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="mt-4 p-3 rounded bg-green-100 text-green-800 text-sm">
-                Your choice has been saved. Thank you!
+              <div className="mt-4">
+                <div className="p-3 rounded bg-green-100 text-green-800 text-sm">
+                  Your choice has been saved. Thank you!
+                </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded border border-neutral-300 dark:border-neutral-700"
+                    onClick={handleBack}
+                  >
+                    Back to search
+                  </button>
+                </div>
               </div>
             )}
           </div>
