@@ -38,11 +38,27 @@ export async function POST(request: Request) {
       { status: 404 }
     );
   }
+  // Ensure target hasn't been taken already
+  const alreadyTaken = await playersCol.findOne({ selectedPlayerId });
+  if (alreadyTaken) {
+    return NextResponse.json(
+      { error: "This player has already been selected by someone else" },
+      { status: 409 }
+    );
+  }
 
-  const result = await playersCol.updateOne(
-    { id: playerId, selectedPlayerId: { $exists: false } },
-    { $set: { selectedPlayerId } }
-  );
+  let result;
+  try {
+    result = await playersCol.updateOne(
+      { id: playerId, selectedPlayerId: { $exists: false } },
+      { $set: { selectedPlayerId } }
+    );
+  } catch (err) {
+    return NextResponse.json(
+      { error: "This player has already been selected by someone else" },
+      { status: 409 }
+    );
+  }
 
   if (!result.modifiedCount) {
     return NextResponse.json(

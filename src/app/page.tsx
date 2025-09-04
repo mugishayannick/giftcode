@@ -22,13 +22,19 @@ export default function Home() {
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [choiceSaved, setChoiceSaved] = useState(false);
   const [target, setTarget] = useState<number | null>(null);
+  const [takenIds, setTakenIds] = useState<number[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/names", { cache: "no-store" });
-        const data = await res.json();
-        setPlayers(data.players ?? []);
+        const [playersRes, takenRes] = await Promise.all([
+          fetch("/api/names", { cache: "no-store" }),
+          fetch("/api/taken", { cache: "no-store" }),
+        ]);
+        const playersData = await playersRes.json();
+        const takenData = await takenRes.json();
+        setPlayers(playersData.players ?? []);
+        setTakenIds(Array.isArray(takenData.ids) ? takenData.ids : []);
       } catch {
         setError("Failed to load players");
       } finally {
@@ -38,9 +44,10 @@ export default function Home() {
   }, []);
 
   const availableNumbers = useMemo(() => {
-    if (!currentPlayer) return players.map((p) => p.id);
-    return players.map((p) => p.id).filter((n) => n !== currentPlayer.id);
-  }, [players, currentPlayer]);
+    const all = players.map((p) => p.id);
+    if (!currentPlayer) return all.filter((n) => !takenIds.includes(n));
+    return all.filter((n) => n !== currentPlayer.id && !takenIds.includes(n));
+  }, [players, currentPlayer, takenIds]);
 
   const shuffledNumbers = useMemo(() => {
     const arr = [...availableNumbers];
@@ -82,8 +89,22 @@ export default function Home() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Save failed");
+      if (!res.ok) {
+        if (res.status === 409) {
+          try {
+            const takenRes = await fetch("/api/taken", { cache: "no-store" });
+            const takenData = await takenRes.json();
+            setTakenIds(Array.isArray(takenData.ids) ? takenData.ids : []);
+            setTarget(null);
+          } catch {}
+        }
+        throw new Error(data.error || "Save failed");
+      }
       setChoiceSaved(true);
+      if (target != null)
+        setTakenIds((prev) =>
+          prev.includes(target) ? prev : [...prev, target]
+        );
     } catch (e) {
       const message = e instanceof Error ? e.message : "Save failed";
       setError(message);

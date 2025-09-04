@@ -34,6 +34,14 @@ export async function POST(request: Request) {
     .catch(() => {});
   await col.createIndex({ id: 1 }, { unique: true });
   await col.createIndex({ name: 1 }, { unique: true });
+  // Ensure each selectedPlayerId is unique among documents that have it set
+  await col.createIndex(
+    { selectedPlayerId: 1 },
+    {
+      unique: true,
+      partialFilterExpression: { selectedPlayerId: { $exists: true } },
+    }
+  );
 
   const docs: Player[] = cleanNames.map((name, idx) => ({ id: idx + 1, name }));
   await col.insertMany(docs);
