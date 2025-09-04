@@ -134,9 +134,9 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-6 flex flex-col items-center">
-      <div className="w-full max-w-xl space-y-6">
+      <div className="w-full max-w-2xl space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-center">
-          GiftCode 🎁
+          CACAHUETE-IMPUNDU 🎁
         </h1>
 
         {!currentPlayer && (
@@ -181,12 +181,12 @@ export default function Home() {
             {!choiceSaved ? (
               <div className="mt-4">
                 <p className="mb-2">Pick a number</p>
-                <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-3 md:gap-3 lg:gap-4">
                   {shuffledNumbers.map((n) => (
                     <button
                       key={n}
                       onClick={() => setTarget(n)}
-                      className={`aspect-square rounded border text-lg font-semibold flex items-center justify-center transition ${
+                      className={`aspect-square rounded border text-base sm:text-lg lg:text-xl font-semibold flex items-center justify-center transition ${
                         target === n
                           ? "bg-black text-white border-black"
                           : "bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700"
@@ -197,6 +197,13 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
+                {target != null && (
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-700 dark:text-neutral-300">
+                    Selected number:{" "}
+                    <span className="font-semibold">{target}</span>. Click{" "}
+                    <span className="font-semibold">Save</span> to confirm.
+                  </div>
+                )}
                 <div className="mt-4 flex justify-between">
                   <button
                     type="button"
